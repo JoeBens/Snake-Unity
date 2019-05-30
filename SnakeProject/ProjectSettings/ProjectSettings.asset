@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 15
-  productGUID: 37f1793dc1d54be42b7302fb8bf94ba8
+  productGUID: 1f6b0cf32d707b848bb90a01101e500e
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: Snake
+  productName: SnakeProject
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -619,8 +619,8 @@ PlayerSettings:
     UNet: 1
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
-  cloudProjectId: 101a171d-6629-49f1-a53c-2fc99d6291c9
-  projectName: Snake (1)
+  cloudProjectId: 167a0b4a-cc59-47a7-9546-dc5d0d80133b
+  projectName: SnakeProject
   organizationId: yb-studio
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
