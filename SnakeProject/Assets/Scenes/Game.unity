@@ -267,5 +267,6 @@ MonoBehaviour:
   playerColor: {r: 0, g: 0, b: 0, a: 0}
   player: {fileID: 0}
   apple: {fileID: 0}
+  tailParent: {fileID: 0}
   cameraHolder: {fileID: 9994640}
-  MoveRate: 0.25
+  MoveRate: 0.15
