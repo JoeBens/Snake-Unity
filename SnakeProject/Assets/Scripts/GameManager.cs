@@ -22,6 +22,11 @@ namespace Joe
         public GameObject apple;
         Node appleNode;
 
+        public GameObject tailParent;
+
+        Node prevPlayerNode;
+
+
 
         public Transform cameraHolder;
 
@@ -31,6 +36,7 @@ namespace Joe
         Node[,] grid;
 
         List<Node> availableNodes = new List<Node>();
+        List<TailNode> tail = new List<TailNode>();
 
 
         bool up, left, right, down;
@@ -50,11 +56,12 @@ namespace Joe
         void Start()
         {
             playerColor = Color.black;
-            appleColor = Color.red;
+            appleColor = Color.yellow;
             CreateMap();
             PlacePlayer();
             PlaceCamera();
             curDirection = Direction.RIGHT;
+            CreateApple();
         }
 
         void CreateMap()
@@ -125,7 +132,12 @@ namespace Joe
             playerSp.sprite = CreateSprite(playerColor);
             playerSp.sortingOrder = 1;
             playerNode = GetNode(3, 3);
-            player.transform.position = playerNode.worldPosition;
+
+            PlacePlayerObject(player, playerNode.worldPosition);
+            
+            player.transform.localScale = Vector3.one * 1.2f;
+
+            tailParent = new GameObject("TailParent");
             
         }
 
@@ -142,7 +154,7 @@ namespace Joe
         void CreateApple()
         {
             apple = new GameObject("Apple");
-            SpriteRenderer appleSp = player.AddComponent<SpriteRenderer>();
+            SpriteRenderer appleSp = apple.AddComponent<SpriteRenderer>();
             appleSp.sprite = CreateSprite(appleColor);
             appleSp.sortingOrder = 1;
             RandomApple();
@@ -204,16 +216,77 @@ namespace Joe
             }
             else
             {
-                if(targetNode == appleNode)
+                if (isTailNode(targetNode))
                 {
-                    
-
-                    RandomApple();
+                    //gameOver
                 }
 
+                bool isScore = false;
+                if(targetNode == appleNode)
+                {
+                    //score
+                    isScore = true;
+                    
+                }
 
-                player.transform.position = targetNode.worldPosition;
+                Node previousNode = playerNode;
+
+                availableNodes.Add(previousNode);
+
+                
+                if (isScore == true)
+                {
+                    tail.Add(CreateTailNode(previousNode.x, previousNode.y));
+                    availableNodes.Remove(previousNode);
+                }
+
+                MoveTail();
+
+                PlacePlayerObject(player, targetNode.worldPosition);
+
+                
                 playerNode = targetNode;
+                availableNodes.Remove(playerNode);
+
+                if (isScore == true)
+                {
+                    if (availableNodes.Count > 0)
+                    {
+                        RandomApple();
+                    }
+                    else
+                    {
+                        //you win
+                    }
+                }
+            }
+        }
+
+        void MoveTail()
+        {
+            Node previousNode = null;
+
+            for (int i = 0; i < tail.Count; i++)
+            {
+                TailNode p = tail[i];
+                availableNodes.Add(p.node);
+
+                if(i == 0)
+                {
+                    previousNode = p.node;
+                    p.node = playerNode;
+                }
+                else
+                {
+                    Node prev = p.node;
+                    p.node = previousNode;
+                    previousNode = prev;
+                }
+
+                availableNodes.Remove(p.node);
+                PlacePlayerObject(p.obj, p.node.worldPosition);
+                
+
             }
         }
 
@@ -221,25 +294,43 @@ namespace Joe
         {
             if (up)
             {
-                curDirection = Direction.UP;
+                SetDirection(Direction.UP);
             }
             else if (down)
             {
-                curDirection = Direction.DOWN;
+                SetDirection(Direction.DOWN);
             }
             else if (left)
             {
-                curDirection = Direction.LEFT;
+                SetDirection(Direction.LEFT);
             }
             else if (right)
             {
-                curDirection = Direction.RIGHT;
+                SetDirection(Direction.RIGHT);
             }
         }
 
+        void SetDirection(Direction d)
+        {
+            if (!isOpposite(d))
+            {
+                curDirection = d;
+                timer = MoveRate + 1;
+            }
+
+
+        }
         #endregion
 
         #region Utilities
+
+
+        void PlacePlayerObject(GameObject obj, Vector3 pos)
+        {
+            pos += Vector3.one * .5f;
+            obj.transform.position = pos;
+        }
+
         Node GetNode(int x, int y)
         {
             if(x < 0 || x > maxWidth-1 || y < 0 || y > maxHeight-1)
@@ -255,9 +346,81 @@ namespace Joe
             int ran = Random.Range(0, availableNodes.Count);
 
             Node n = availableNodes[ran];
-
-            apple.transform.position = n.worldPosition;
+            PlacePlayerObject(apple, n.worldPosition);
+            
             appleNode = n;
+        }
+
+        bool isOpposite(Direction d)
+        {
+            switch (d)
+            {
+                default:
+                case Direction.UP:
+                    if (curDirection == Direction.DOWN)
+                    {
+                        return true;
+                    }
+                    else
+                        return false;
+                    
+                case Direction.DOWN:
+                    if (curDirection == Direction.UP)
+                    {
+                        return true;
+                    }
+                    else
+                        return false;
+                   
+                case Direction.LEFT:
+                    if (curDirection == Direction.RIGHT)
+                    {
+                        return true;
+                    }
+                    else
+                        return false;
+                case Direction.RIGHT:
+                    if (curDirection == Direction.LEFT)
+                    {
+                        return true;
+                    }
+                    else
+                        return false;
+            }
+        }
+
+        bool isTailNode(Node n)
+        {
+            for (int i = 0; i < tail.Count; i++)
+            {
+                if (tail[i].node == n)
+                    return true;
+                
+                    
+            }
+            return false;
+        }
+
+        bool isValidDirection(Node targetNode)
+        {
+            return targetNode == prevPlayerNode;
+                 
+
+        }
+
+        TailNode CreateTailNode(int x, int y)
+        {
+            TailNode s = new TailNode();
+            s.node = GetNode(x, y);
+            s.obj = new GameObject("tail");
+            s.obj.transform.parent = tailParent.transform;
+            s.obj.transform.position = s.node.worldPosition;
+            s.obj.transform.localScale = Vector3.one * .95f;
+            SpriteRenderer r = s.obj.AddComponent<SpriteRenderer>();
+            r.sprite = CreateSprite(playerColor);
+            r.sortingOrder = 1;
+
+            return s;
         }
 
         Sprite CreateSprite(Color targetColor)
@@ -267,7 +430,7 @@ namespace Joe
             txt.Apply();
             txt.filterMode = FilterMode.Point;
             Rect rect = new Rect(0, 0, 1, 1);
-            return Sprite.Create(txt, rect, Vector2.zero, 1, 0, SpriteMeshType.FullRect);
+            return Sprite.Create(txt, rect, Vector2.one *.5f, 1, 0, SpriteMeshType.FullRect);
 
         }
         #endregion
